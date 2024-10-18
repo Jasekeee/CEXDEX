@@ -52,7 +52,7 @@
 <body>
     <h1>Арбитраж Цены Токенов</h1>
     <div>
-        <input type="text" id="token" placeholder="Введите токен (например, btc)">
+        <input type="text" id="token" placeholder="Введите токен (например, bitcoin)">
         <button onclick="getPrices()">Получить цены</button>
     </div>
     <div id="result"></div>
@@ -61,20 +61,12 @@
         async function getPrices() {
             const token = document.getElementById('token').value.toLowerCase(); // Приводим к нижнему регистру
             const cexUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${token}&vs_currencies=usd`;
-            const dexUrl = `https://api.dexscreener.com/latest/dex/tokens/${token}`;
+            const dexAddress = token === 'bitcoin' ? '0x...'; // Замените на фактический адрес контракта для DEX
+            const dexUrl = `https://api.dexscreener.com/latest/dex/tokens/${dexAddress}`;
 
             try {
                 const cexResponse = await fetch(cexUrl);
                 const dexResponse = await fetch(dexUrl);
-
-                // Проверка успешности ответов
-                if (!cexResponse.ok) {
-                    throw new Error(`Ошибка в запросе к CEX API: ${cexResponse.statusText}`);
-                }
-                if (!dexResponse.ok) {
-                    throw new Error(`Ошибка в запросе к DEX API: ${dexResponse.statusText}`);
-                }
-
                 const cexData = await cexResponse.json();
                 const dexData = await dexResponse.json();
 
@@ -87,7 +79,7 @@
                     resultHTML += 'CEX: Токен не найден.<br>';
                 }
 
-                if (dexData.pair) {
+                if (dexData && dexData.pair) {
                     resultHTML += `DEX Цена ${token}: $${dexData.pair.price}<br>`;
                 } else {
                     resultHTML += 'DEX: Токен не найден.<br>';
@@ -95,8 +87,7 @@
 
                 document.getElementById('result').innerHTML = resultHTML;
             } catch (error) {
-                document.getElementById('result').innerHTML = `Ошибка получения данных: ${error.message}`;
-                console.error(error); // Вывод ошибки в консоль для отладки
+                document.getElementById('result').innerHTML = 'Ошибка получения данных. Пожалуйста, попробуйте позже.';
             }
         }
     </script>
